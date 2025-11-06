@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indian Note Recognition</title>
+<link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+</head>
+<body class="bg-light d-flex flex-column align-items-center justify-content-center vh-100">
+
+    <div class="card shadow p-4" style="max-width: 400px; width: 100%;">
+        <h3 class="text-center mb-4 text-primary">Indian Note Recognition</h3>
+
+        <form action="/predict" method="post" enctype="multipart/form-data" class="text-center">
+            <div class="mb-3">
+                <input class="form-control" type="file" name="file" accept="image/*" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Predict</button>
+        </form>
+
+        {% if validation_accuracy %}
+            <div class="alert alert-success text-center mt-3">
+                🔍 Validation Accuracy: {{ validation_accuracy }}
+            </div>
+        {% endif %}
+
+        {% if prediction_text %}
+            <div class="alert alert-info text-center mt-4">
+                {{ prediction_text }}
+            </div>
+        {% endif %}
+
+        {% if uploaded_image %}
+            <div class="text-center mt-3">
+                <h6>Uploaded Image:</h6>
+                <img src="{{ uploaded_image }}" alt="Note Image" class="img-fluid rounded shadow-sm" style="max-height: 200px;">
+            </div>
+        {% endif %}
+
+        {% if audio_file %}
+            <div class="text-center mt-3">
+                <audio controls autoplay>
+                    <source src="{{ audio_file }}" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+        {% endif %}
+    </div>
+<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+
+</body>
+</html>

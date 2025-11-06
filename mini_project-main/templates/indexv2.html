@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Indian Note Recognition</title>
+<link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+<style>
+video { width: 100%; border-radius: 10px; }
+.card { max-width: 450px; margin-top: 20px; }
+</style>
+</head>
+<body class="bg-light d-flex flex-column align-items-center justify-content-center vh-100">
+
+<div class="card shadow p-4">
+    <h3 class="text-center mb-4 text-primary">Indian Note Recognition</h3>
+
+    <!-- Video Feed -->
+    <div class="text-center mb-3">
+        <video id="video" autoplay playsinline></video>
+    </div>
+
+    <!-- Prediction -->
+    <div class="text-center">
+        <h5 id="predictionText" class="text-primary">Waiting for note...</h5>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+<script>
+const video = document.getElementById("video");
+const predictionText = document.getElementById("predictionText");
+
+// Access webcam (use back camera on mobile)
+navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+.then(stream => video.srcObject = stream)
+.catch(err => {
+    predictionText.innerText = "Camera access denied!";
+    console.error("Camera error:", err);
+});
+
+const canvas = document.createElement("canvas");
+const ctx = canvas.getContext("2d");
+
+let lastNote = "";
+let speaking = false;
+
+function speakText(text) {
+    if (speaking) return; // avoid overlapping voices
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = "en-IN";
+    utter.pitch = 1;
+    utter.rate = 0.9;
+    speaking = true;
+    utter.onend = () => { speaking = false; };
+    window.speechSynthesis.speak(utter);
+}
+
+function sendFrame() {
+    if (!video.videoWidth) return;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const dataURL = canvas.toDataURL("image/jpeg");
+
+    fetch("/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: dataURL })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.confidence > 80 && data.label !== lastNote) {
+            lastNote = data.label;
+            const message = `Detected ${data.label} `;
+            predictionText.innerText = `💵 ${message}`;
+            speakText(message);
+            setTimeout(() => { lastNote = ""; }, 2000);
+        }
+    })
+    .catch(err => console.error(err));
+}
+
+// Send frame every 700ms (adjustable)
+setInterval(sendFrame, 700);
+</script>
+
+</body>
+</html>
