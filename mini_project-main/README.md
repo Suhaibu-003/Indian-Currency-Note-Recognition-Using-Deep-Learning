@@ -200,8 +200,12 @@ audio_map = {
 ---
 
 ## 🧑‍💻 Contributors
-- **Sanjaykumar V** — B.Tech AIML Student  
+- **Sanjaykumar V** — B.Tech AIML Student
+- **Suhaibu U** — B.Tech AIML Student
+- **Visvanath R** — B.Tech AIML Student
+- **Nandhish S** — B.Tech AIML Student
   _Indian Currency Recognition Project (2025)_
+
 
 ---
 
